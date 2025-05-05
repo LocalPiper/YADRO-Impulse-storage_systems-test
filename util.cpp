@@ -1,5 +1,6 @@
+#include "util.hpp"
 #include <stdexcept>
-#include <string>
+
 int timeToInt(std::string time) {
   if (time.size() != 5 || time[2] != ':')
     throw std::runtime_error(
