@@ -40,6 +40,7 @@ public:
   int try_enter(const int enter_time, const std::string &client);
   int try_place(const int place_time, const std::string &client,
                 const int table);
+  int try_leave(const int leave_time, const std::string &client);
 };
 
 #endif // CLUB_HPP

@@ -40,6 +40,13 @@ void interpret(const DataBox &box) {
       break;
     }
     case IN_LEAVE: {
+      int result = club.try_leave(time, client);
+      if (result == 0) {
+        print(query, std::nullopt);
+        break;
+      }
+      OutQuery outQ = {time, OUT_ERROR, "ClientUnknown"};
+      print(query, outQ);
       break;
     }
     default:

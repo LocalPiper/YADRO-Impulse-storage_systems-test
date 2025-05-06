@@ -29,7 +29,7 @@ bool is_table_occupied(const Tables &tables, const int table) {
 
 int Club::try_place(const int place_time, const std::string &client,
                     const int table) {
-  // precedence: assume we first check if client is even in the club, then we
+  // precedence: first we check if client is even in the club, then we
   // check if he can sit
   if (client_set.s.find(client) != client_set.s.end()) {
     // client is in the club and not waiting
@@ -42,7 +42,7 @@ int Club::try_place(const int place_time, const std::string &client,
     return 0;
   }
   if (tables.client_to_table.find(client) != tables.client_to_table.end()) {
-    // client is already sitting at the table
+    // client is already sitting at the table and wants to switch
     if (is_table_occupied(tables, table)) {
       return 1; // PlaceIsBusy
     }
@@ -61,4 +61,25 @@ int Club::try_place(const int place_time, const std::string &client,
   }
   // otherwise client is not in the club
   return 2; // ClientUnknown
+}
+
+int Club::try_leave(const int leave_time, const std::string &client) {
+  // precedence: first we check if client is even in the club
+  if (client_set.s.find(client) != client_set.s.end()) {
+    // if he is in the club and not waiting or sitting, we can delete him
+    client_set.s.erase(client);
+    return 0;
+  }
+  if (tables.client_to_table.find(client) != tables.client_to_table.end()) {
+    // record his sitting and delete him
+    int lastTable = tables.client_to_table[client];
+    auto [_, start] = tables.table_to_client[lastTable];
+    tables.table_to_client.erase(lastTable);
+    tables.client_to_table.erase(client);
+    auto &rec = table_records[lastTable];
+    rec.time_operating += leave_time - start;
+    rec.accumulated_cost += ceil_time(leave_time - start);
+    return 0;
+  }
+  return 1; // ClientUnknown
 }
