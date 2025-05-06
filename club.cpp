@@ -9,3 +9,14 @@ Club::Club(int num, int cost, int start, int end)
     table_records[x] = {0, 0};
   }
 };
+
+int Club::try_enter(const int enter_time, const std::string &client) {
+  if (enter_time < start_time || enter_time > end_time) {
+    return 1; // NotOpenYet
+  }
+  if (client_set.s.find(client) != client_set.s.end()) {
+    return 2; // YouShallNotPass
+  }
+  client_set.s.insert(client);
+  return 0;
+}

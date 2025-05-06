@@ -4,10 +4,15 @@
 #include <queue>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 struct WaitingQueue {
   std::queue<std::string> q;
+};
+
+struct ClientSet {
+  std::unordered_set<std::string> s;
 };
 
 struct Tables {
@@ -26,11 +31,13 @@ class Club {
   int start_time;
   int end_time;
   WaitingQueue waiting_queue;
+  ClientSet client_set;
   Tables tables;
   std::unordered_map<int, Record> table_records;
 
 public:
   Club(int num, int cost, int start, int end);
+  int try_enter(const int enter_time, const std::string &client);
 };
 
 #endif // CLUB_HPP

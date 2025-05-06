@@ -1,8 +1,8 @@
 #include "box.hpp"
+#include "interpreter.hpp"
 #include "parser.hpp"
 #include <fstream>
 #include <iostream>
-#include <ostream>
 #include <vector>
 
 int main(int argc, char *argv[]) {
@@ -22,13 +22,15 @@ int main(int argc, char *argv[]) {
     std::cerr << "Error: couldn't open file " << argv[1] << std::endl;
     return -1;
   }
-
+  DataBox data;
   try {
-    DataBox data = parse(lines);
+    data = parse(lines);
   } catch (const ValidationError &err) {
     std::cerr << err.what() << std::endl;
     return -1;
   }
+
+  interpret(data);
 
   return 0;
 }
