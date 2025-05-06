@@ -1,3 +1,4 @@
+#include "box.hpp"
 #include "parser.hpp"
 #include <fstream>
 #include <iostream>
@@ -23,7 +24,7 @@ int main(int argc, char *argv[]) {
   }
 
   try {
-    std::cout << parse(lines) << std::endl;
+    DataBox data = parse(lines);
   } catch (const ValidationError &err) {
     std::cerr << err.what() << std::endl;
     return -1;

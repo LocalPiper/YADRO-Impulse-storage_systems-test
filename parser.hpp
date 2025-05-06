@@ -1,6 +1,7 @@
 #ifndef PARSER_HPP
 #define PARSER_HPP
 
+#include "box.hpp"
 #include <string>
 #include <vector>
 
@@ -14,6 +15,6 @@ public:
   const char *what() const noexcept override { return message.c_str(); }
 };
 
-std::string parse(std::vector<std::string> &lines);
+DataBox parse(std::vector<std::string> &lines);
 
 #endif // PARSER_HPP

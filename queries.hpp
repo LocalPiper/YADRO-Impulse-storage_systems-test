@@ -12,15 +12,15 @@ enum InEventType {
 enum OutEventType { OUT_LEFT = 11, OUT_PLACED = 12, OUT_ERROR = 13 };
 
 struct InQuery {
-  std::string time;
-  InEventType eventType;
+  int time;
+  InEventType event_type;
   std::string client;
   int table = 0; // optional
 };
 
 struct OutQuery {
-  std::string time;
-  OutEventType eventType;
+  int time;
+  OutEventType event_type;
   std::string body;
 };
 

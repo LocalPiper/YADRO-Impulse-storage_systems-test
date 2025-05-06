@@ -1,8 +1,10 @@
 #include "parser.hpp"
+#include "queries.hpp"
 #include "util.hpp"
 #include <sstream>
+#include <vector>
 
-std::string parse(std::vector<std::string> &lines) {
+DataBox parse(std::vector<std::string> &lines) {
   if (lines.size() < 3) {
     throw ValidationError("There are less than 3 lines in the file!");
   }
@@ -40,10 +42,11 @@ std::string parse(std::vector<std::string> &lines) {
 
   // all other lines
   int prev_time = 0;
+  std::vector<InQuery> queries;
   for (int i = 3; i < (int)lines.size(); ++i) {
     std::istringstream ss(lines[i]);
     std::string time_str, event_type_str, client, table_str, extra;
-    int event_type;
+    int event_type, table_num;
 
     if (!(ss >> time_str >> event_type_str) || !is_valid_time(time_str)) {
       throw ValidationError("Format error on line " + std::to_string(i + 1));
@@ -74,7 +77,7 @@ std::string parse(std::vector<std::string> &lines) {
       }
 
       try {
-        int table_num = std::stoi(table_str);
+        table_num = std::stoi(table_str);
         if (table_num < 1 || table_num > num_of_tables) {
           throw ValidationError("Format error on line " +
                                 std::to_string(i + 1));
@@ -87,7 +90,10 @@ std::string parse(std::vector<std::string> &lines) {
     if (ss >> extra) {
       throw ValidationError("Format error on line " + std::to_string(i + 1));
     }
+
+    queries.push_back({curr_time, static_cast<InEventType>(event_type), client,
+                       (event_type == 2) ? table_num : 0});
   }
 
-  return "GOOD";
+  return {num_of_tables, start_time, end_time, cost, queries};
 }
