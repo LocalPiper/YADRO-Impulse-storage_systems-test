@@ -38,6 +38,8 @@ class Club {
 public:
   Club(int num, int cost, int start, int end);
   int try_enter(const int enter_time, const std::string &client);
+  int try_place(const int place_time, const std::string &client,
+                const int table);
 };
 
 #endif // CLUB_HPP

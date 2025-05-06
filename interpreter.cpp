@@ -26,6 +26,14 @@ void interpret(const DataBox &box) {
       break;
     }
     case IN_PLACED: {
+      int result = club.try_place(time, client, table);
+      if (result == 0) {
+        print(query, std::nullopt);
+        break;
+      }
+      OutQuery outQ = {time, OUT_ERROR,
+                       (result == 1) ? "PlaceIsBusy" : "ClientUnknown"};
+      print(query, outQ);
       break;
     }
     case IN_WAIT: {

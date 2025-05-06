@@ -17,6 +17,8 @@ int time_to_int(std::string time) {
   return h * 60 + m;
 }
 
+int ceil_time(int time) { return (time + 59) / 60; }
+
 std::string int_to_time(int time) {
   int h = time / 60;
   int m = time % 60;

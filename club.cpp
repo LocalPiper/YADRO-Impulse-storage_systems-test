@@ -1,4 +1,6 @@
 #include "club.hpp"
+#include "util.hpp"
+#include <string>
 
 Club::Club(int num, int cost, int start, int end)
     : number_of_tables(num), cost_per_hour(cost), start_time(start),
@@ -19,4 +21,44 @@ int Club::try_enter(const int enter_time, const std::string &client) {
   }
   client_set.s.insert(client);
   return 0;
+}
+
+bool is_table_occupied(const Tables &tables, const int table) {
+  return tables.table_to_client.find(table) != tables.table_to_client.end();
+}
+
+int Club::try_place(const int place_time, const std::string &client,
+                    const int table) {
+  // precedence: assume we first check if client is even in the club, then we
+  // check if he can sit
+  if (client_set.s.find(client) != client_set.s.end()) {
+    // client is in the club and not waiting
+    if (is_table_occupied(tables, table)) {
+      return 1; // PlaceIsBusy
+    }
+    tables.client_to_table[client] = table;
+    tables.table_to_client[table] = {client, place_time};
+    client_set.s.erase(client);
+    return 0;
+  }
+  if (tables.client_to_table.find(client) != tables.client_to_table.end()) {
+    // client is already sitting at the table
+    if (is_table_occupied(tables, table)) {
+      return 1; // PlaceIsBusy
+    }
+    // record the last sitting
+    int lastTable = tables.client_to_table[client];
+    auto [_, start] = tables.table_to_client[lastTable];
+    tables.table_to_client.erase(lastTable);
+    auto &rec = table_records[lastTable];
+    rec.time_operating += place_time - start;
+    rec.accumulated_cost += ceil_time(place_time - start);
+
+    // replace with new one
+    tables.client_to_table[client] = table;
+    tables.table_to_client[table] = {client, place_time};
+    return 0;
+  }
+  // otherwise client is not in the club
+  return 2; // ClientUnknown
 }
