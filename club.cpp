@@ -1,6 +1,8 @@
 #include "club.hpp"
 #include "util.hpp"
+#include <set>
 #include <string>
+#include <unordered_map>
 #include <utility>
 
 Club::Club(int num, int cost, int start, int end)
@@ -153,3 +155,37 @@ std::pair<std::string, int> Club::try_place_from_queue(const int place_time,
   waiting_queue.pop();
   return {client, table};
 }
+
+std::set<std::string> Club::kick_clients() {
+  std::set<std::string> clients;
+  // first those that are sitting at the computers
+  for (const auto &[table, pair] : tables.table_to_client) {
+    std::string client = pair.first;
+    int time = pair.second;
+    // money
+    auto &rec = table_records[table];
+    rec.time_operating += end_time - time;
+    rec.accumulated_cost += ceil_time(end_time - time);
+    clients.insert(client);
+    tables.client_to_table.erase(client);
+  }
+  tables.table_to_client.clear();
+
+  // then those in the queue
+  while (!waiting_queue.empty()) {
+    std::string client = waiting_queue.front();
+    clients.insert(client);
+    waiting_queue.remove(client);
+  }
+
+  // then those in the club ig
+  while (!client_set.s.empty()) {
+    std::string client = *client_set.s.begin();
+    clients.insert(client);
+    client_set.s.erase(client);
+  }
+
+  return clients;
+}
+
+std::unordered_map<int, Record> Club::get_records() { return table_records; }

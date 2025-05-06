@@ -3,6 +3,7 @@
 
 #include <iterator>
 #include <list>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -80,6 +81,8 @@ public:
   int try_leave(const int leave_time, const std::string &client);
   std::pair<std::string, int> try_place_from_queue(const int place_time,
                                                    int table);
+  std::set<std::string> kick_clients();
+  std::unordered_map<int, Record> get_records();
 };
 
 #endif // CLUB_HPP

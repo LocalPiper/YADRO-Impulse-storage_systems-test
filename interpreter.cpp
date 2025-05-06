@@ -2,17 +2,26 @@
 #include "club.hpp"
 #include "printer.hpp"
 #include "queries.hpp"
+#include "util.hpp"
+#include <iostream>
 #include <optional>
+#include <set>
 #include <stdexcept>
 #include <string>
+
 void interpret(const DataBox &box) {
   Club club(box.num_of_tables, box.cost, box.start_time, box.end_time);
-
+  std::cout << int_to_time(box.start_time) << std::endl;
   for (auto query : box.queries) {
     std::string client = query.client;
     int time = query.time;
     InEventType event_type = query.event_type;
     int table = query.table;
+
+    if (time >= box.end_time) {
+      // stop everything!
+      break;
+    }
 
     switch (event_type) {
     case IN_ENTER: {
@@ -71,5 +80,19 @@ void interpret(const DataBox &box) {
     default:
       throw std::runtime_error("this should not happen");
     }
+  }
+  // performing counting and cleanup
+  std::set<std::string> clients = club.kick_clients();
+  for (auto client : clients) {
+    print({box.end_time, OUT_LEFT, client});
+  }
+  std::cout << int_to_time(box.end_time) << std::endl;
+  std::unordered_map<int, Record> records = club.get_records();
+  for (int record = 1; record <= (int)records.size(); ++record) {
+    std::string out =
+        std::to_string(record) + " " +
+        std::to_string(records[record].accumulated_cost * box.cost) + " " +
+        int_to_time(records[record].time_operating);
+    std::cout << out << std::endl;
   }
 }
