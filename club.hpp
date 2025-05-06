@@ -71,12 +71,15 @@ class Club {
   std::unordered_map<int, Record> table_records;
 
 public:
+  int recently_freed_table = 0;
   Club(int num, int cost, int start, int end);
   int try_enter(const int enter_time, const std::string &client);
   int try_place(const int place_time, const std::string &client,
                 const int table);
   int try_queue(const int queue_time, const std::string &client);
   int try_leave(const int leave_time, const std::string &client);
+  std::pair<std::string, int> try_place_from_queue(const int place_time,
+                                                   int table);
 };
 
 #endif // CLUB_HPP

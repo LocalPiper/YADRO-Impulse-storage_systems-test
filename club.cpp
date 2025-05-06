@@ -1,6 +1,7 @@
 #include "club.hpp"
 #include "util.hpp"
 #include <string>
+#include <utility>
 
 Club::Club(int num, int cost, int start, int end)
     : number_of_tables(num), cost_per_hour(cost), start_time(start),
@@ -16,7 +17,8 @@ int Club::try_enter(const int enter_time, const std::string &client) {
   if (enter_time < start_time || enter_time > end_time) {
     return 1; // NotOpenYet
   }
-  if (client_set.s.find(client) != client_set.s.end()) {
+  if (client_set.s.find(client) != client_set.s.end() ||
+      waiting_queue.contains(client)) {
     return 2; // YouShallNotPass
   }
   client_set.s.insert(client);
@@ -57,7 +59,14 @@ int Club::try_place(const int place_time, const std::string &client,
     // replace with new one
     tables.client_to_table[client] = table;
     tables.table_to_client[table] = {client, place_time};
+
+    // buffer the now free table
+    recently_freed_table = lastTable;
     return 0;
+  }
+  if (waiting_queue.contains(client)) {
+    // if he is in the queue he can't sit because he must wait
+    return 3; // BackInTheLine!
   }
   // otherwise client is not in the club
   return 2; // ClientUnknown
@@ -68,7 +77,7 @@ int Club::try_queue(const int queue_time, const std::string &client) {
   // then we check if he can wait
   if (client_set.s.find(client) != client_set.s.end()) {
     // he is in the club and not waiting
-    if (tables.table_to_client.size() < number_of_tables) {
+    if ((int)tables.table_to_client.size() < number_of_tables) {
       return 1; // ICanWaitNoLonger!
     }
     waiting_queue.push(client);
@@ -92,6 +101,11 @@ int Club::try_leave(const int leave_time, const std::string &client) {
     client_set.s.erase(client);
     return 0;
   }
+  if (waiting_queue.contains(client)) {
+    // if he is in the queue he can just leave
+    waiting_queue.remove(client);
+    return 0;
+  }
   if (tables.client_to_table.find(client) != tables.client_to_table.end()) {
     // record his sitting and delete him
     int lastTable = tables.client_to_table[client];
@@ -101,7 +115,41 @@ int Club::try_leave(const int leave_time, const std::string &client) {
     auto &rec = table_records[lastTable];
     rec.time_operating += leave_time - start;
     rec.accumulated_cost += ceil_time(leave_time - start);
+
+    // buffer the now free table
+    recently_freed_table = lastTable;
     return 0;
   }
   return 1; // ClientUnknown
+}
+
+std::pair<std::string, int> Club::try_place_from_queue(const int place_time,
+                                                       int table = 0) {
+  if (waiting_queue.empty())
+    return {"", 0};
+  if ((int)tables.table_to_client.size() == number_of_tables) {
+    return {"", 0};
+  }
+  // assume we know where to sit, so we try
+  if (table != 0) {
+    // is it occupied?
+    if (is_table_occupied(tables, table))
+      return {"", 0};
+    std::string client = waiting_queue.front();
+    tables.client_to_table[client] = table;
+    tables.table_to_client[table] = {client, place_time};
+    waiting_queue.pop();
+    recently_freed_table = 0;
+    return {client, table};
+  }
+  // otherwise we use buffered value to do so
+  if (recently_freed_table == 0)
+    return {"", 0};
+  table = recently_freed_table;
+  recently_freed_table = 0;
+  std::string client = waiting_queue.front();
+  tables.client_to_table[client] = table;
+  tables.table_to_client[table] = {client, place_time};
+  waiting_queue.pop();
+  return {client, table};
 }

@@ -24,3 +24,9 @@ void print(const InQuery &inQ, std::optional<OutQuery> outQ = std::nullopt) {
     std::cout << out << std::endl;
   }
 }
+
+void print(const OutQuery &outQ) {
+  std::string out = int_to_time(outQ.time) + " " +
+                    std::to_string(outQ.event_type) + " " + outQ.body;
+  std::cout << out << std::endl;
+}

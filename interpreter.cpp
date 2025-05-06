@@ -4,6 +4,7 @@
 #include "queries.hpp"
 #include <optional>
 #include <stdexcept>
+#include <string>
 void interpret(const DataBox &box) {
   Club club(box.num_of_tables, box.cost, box.start_time, box.end_time);
 
@@ -29,10 +30,15 @@ void interpret(const DataBox &box) {
       int result = club.try_place(time, client, table);
       if (result == 0) {
         print(query, std::nullopt);
+        auto p = club.try_place_from_queue(time, table);
+        if (p.first != "")
+          print({time, OUT_PLACED, p.first + " " + std::to_string(p.second)});
         break;
       }
       OutQuery outQ = {time, OUT_ERROR,
-                       (result == 1) ? "PlaceIsBusy" : "ClientUnknown"};
+                       (result == 1)   ? "PlaceIsBusy"
+                       : (result == 2) ? "ClientUnknown"
+                                       : "BackInTheLine!"};
       print(query, outQ);
       break;
     }
@@ -53,6 +59,9 @@ void interpret(const DataBox &box) {
       int result = club.try_leave(time, client);
       if (result == 0) {
         print(query, std::nullopt);
+        auto p = club.try_place_from_queue(time, 0);
+        if (p.first != "")
+          print({time, OUT_PLACED, p.first + " " + std::to_string(p.second)});
         break;
       }
       OutQuery outQ = {time, OUT_ERROR, "ClientUnknown"};
