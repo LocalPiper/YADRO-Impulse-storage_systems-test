@@ -4,7 +4,7 @@
 
 Club::Club(int num, int cost, int start, int end)
     : number_of_tables(num), cost_per_hour(cost), start_time(start),
-      end_time(end), waiting_queue({std::queue<std::string>()}),
+      end_time(end),
       tables({std::unordered_map<int, std::pair<std::string, int>>(),
               std::unordered_map<std::string, int>()}) {
   for (int x = 1; x <= num; ++x) {
@@ -61,6 +61,28 @@ int Club::try_place(const int place_time, const std::string &client,
   }
   // otherwise client is not in the club
   return 2; // ClientUnknown
+}
+
+int Club::try_queue(const int queue_time, const std::string &client) {
+  // precedence: first we check if client is even in the club,
+  // then we check if he can wait
+  if (client_set.s.find(client) != client_set.s.end()) {
+    // he is in the club and not waiting
+    if (tables.table_to_client.size() < number_of_tables) {
+      return 1; // ICanWaitNoLonger!
+    }
+    waiting_queue.push(client);
+    return 0;
+  }
+  // yeah, but what if he is already in the queue or already sitting?
+  // that was not specified in the task, so i will enforce my rules
+  // client cannot go to the queue if he is already there
+  if (tables.client_to_table.find(client) != tables.client_to_table.end() ||
+      waiting_queue.contains(client)) {
+    return 2; // IShallNotWait!
+  }
+  // i'll also make sure that he cannot wait if he is not in the club
+  return 3; // ClientUnknown
 }
 
 int Club::try_leave(const int leave_time, const std::string &client) {

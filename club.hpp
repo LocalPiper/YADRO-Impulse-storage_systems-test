@@ -1,14 +1,49 @@
 #ifndef CLUB_HPP
 #define CLUB_HPP
 
-#include <queue>
+#include <iterator>
+#include <list>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 
-struct WaitingQueue {
-  std::queue<std::string> q;
+class WaitingQueue {
+private:
+  std::list<std::string> queue;
+  std::unordered_map<std::string, std::list<std::string>::iterator> lookup;
+
+public:
+  void push(const std::string &client) {
+    queue.push_back(client);
+    auto it = std::prev(queue.end());
+    lookup[client] = it;
+  }
+
+  void remove(const std::string &client) {
+    auto it = lookup.find(client);
+    if (it != lookup.end()) {
+      queue.erase(it->second);
+      lookup.erase(it);
+    }
+  }
+
+  bool contains(const std::string &client) const {
+    return lookup.count(client) > 0;
+  }
+
+  std::string front() const { return queue.front(); }
+
+  void pop() {
+    if (!queue.empty()) {
+      lookup.erase(queue.front());
+      queue.pop_front();
+    }
+  }
+
+  bool empty() const { return queue.empty(); }
+
+  int size() const { return queue.size(); }
 };
 
 struct ClientSet {
@@ -40,6 +75,7 @@ public:
   int try_enter(const int enter_time, const std::string &client);
   int try_place(const int place_time, const std::string &client,
                 const int table);
+  int try_queue(const int queue_time, const std::string &client);
   int try_leave(const int leave_time, const std::string &client);
 };
 

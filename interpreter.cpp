@@ -37,6 +37,16 @@ void interpret(const DataBox &box) {
       break;
     }
     case IN_WAIT: {
+      int result = club.try_queue(time, client);
+      if (result == 0) {
+        print(query, std::nullopt);
+        break;
+      }
+      OutQuery outQ = {time, OUT_ERROR,
+                       (result == 1)   ? "ICanWaitNoLonger!"
+                       : (result == 2) ? "IShallNotWait!"
+                                       : "ClientUnknown"};
+      print(query, outQ);
       break;
     }
     case IN_LEAVE: {
