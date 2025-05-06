@@ -3,8 +3,12 @@
 
 #include <string>
 
-int timeToInt(std::string time);
+int time_to_int(std::string time);
 
-std::string intToTime(int time);
+std::string int_to_time(int time);
+
+bool is_valid_time(const std::string &time);
+
+bool is_valid_client(const std::string &client);
 
 #endif // UTIL_HPP

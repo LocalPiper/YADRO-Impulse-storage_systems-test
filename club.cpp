@@ -9,32 +9,33 @@ struct WaitingQueue {
 };
 
 struct Tables {
-  std::unordered_map<int, std::pair<std::string, int>> tableToClient;
-  std::unordered_map<std::string, int> clientToTable;
+  std::unordered_map<int, std::pair<std::string, int>> table_to_client;
+  std::unordered_map<std::string, int> client_to_table;
 };
 
 struct Record {
-  long long accumulatedCost;
-  int timeOperating;
+  long long accumulated_cost;
+  int time_operating;
 };
 
 class Club {
-  int numberOfTables;
-  int costPerHour;
-  int startTime;
-  int endTime;
-  WaitingQueue waitingQueue;
+  int number_of_tables;
+  int cost_per_hour;
+  int start_time;
+  int end_time;
+  WaitingQueue waiting_queue;
   Tables tables;
-  std::unordered_map<int, Record> tableRecords;
+  std::unordered_map<int, Record> table_records;
 
 public:
   Club(int num, int cost, std::string start, std::string end)
-      : numberOfTables(num), costPerHour(cost), startTime(timeToInt(start)),
-        endTime(timeToInt(end)), waitingQueue({std::queue<std::string>()}),
+      : number_of_tables(num), cost_per_hour(cost),
+        start_time(time_to_int(start)), end_time(time_to_int(end)),
+        waiting_queue({std::queue<std::string>()}),
         tables({std::unordered_map<int, std::pair<std::string, int>>(),
                 std::unordered_map<std::string, int>()}) {
     for (int x = 1; x <= num; ++x) {
-      tableRecords[x] = {0, 0};
+      table_records[x] = {0, 0};
     }
   }
 };
